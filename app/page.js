@@ -1,95 +1,132 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
+import Task from './components/task/page';
+import * as yup from 'yup';
+import { Formik, useFormik } from "formik";
+import { TextField, Select, MenuItem, FormControl, InputLabel, FormHelperText } from "@mui/material";
+import Button from '@mui/material/Button';
+import './styles.css'; 
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const router = useRouter();
+  const [tasks, setTasks] = useState([]);
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const validation = yup.object({
+    title: yup
+      .string()
+      .required('Task name is required'),
+    priority: yup
+      .string()
+      .required('Priority is required'),
+    status: yup
+      .string()
+      .required('Status is required')
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      title: '',
+      priority: 'High',
+      status: 'Pending'
+    },
+    validationSchema: validation,
+    onSubmit: async (values) => {
+      try {
+        await axios.post(`http://localhost:3001/todo/`, values);
+        formik.resetForm();
+        fetchTasks();
+      } catch (error) {
+        console.error('Error updating task:', error);
+      }
+    },
+  });
+
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/todo/');
+      setTasks(response.data.tasks);
+      console.log(response.data.tasks);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const handleEdit = (id) => {
+    router.push(`/editModal/${id}`);
+  };
+
+  const handleDelete = (id) => {
+    console.log('Deleting task');
+    const updatedTasks = tasks.filter(task => task._id !== id);
+    setTasks(updatedTasks);
+
+    axios.delete(`http://localhost:3001/todo/?id=${id}`)
+      .then(response => {
+        console.log('Task deleted:', response.data);
+      })
+      .catch(error => {
+        console.error('Error deleting task:', error);
+      });
+  };
+
+  return (
+    <div className="container">
+      <h1 className="header">Task Management</h1>
+
+      <form onSubmit={formik.handleSubmit} className="form">
+        <TextField
+          id="title"
+          name="title"
+          label="Task Name"
+          variant="outlined"
+          onChange={formik.handleChange}
+          error={formik.touched.title && Boolean(formik.errors.title)}
+          helperText={formik.touched.title && formik.errors.title}
+          value={formik.values.title}
+          className="textField"
+        />
+
+        <FormControl
+          variant="outlined"
+          error={formik.touched.priority && Boolean(formik.errors.priority)}
+          className="selectField"
+        >
+          <InputLabel>Priority</InputLabel>
+          <Select
+            id="priority"
+            name="priority"
+            value={formik.values.priority}
+            onChange={formik.handleChange}
+            label="Priority"
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+            <MenuItem value="High">High</MenuItem>
+            <MenuItem value="Medium">Medium</MenuItem>
+            <MenuItem value="Low">Low</MenuItem>
+          </Select>
+          <FormHelperText>
+            {formik.touched.priority && formik.errors.priority}
+          </FormHelperText>
+        </FormControl>
+
+        <Button type="submit" className="submitButton" variant="contained">Submit</Button>
+      </form>
+
+      <div className="task-container">
+        {tasks.map((task, index) => (
+          <Task
+            key={task._id} 
+            data={task}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
           />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        ))}
+      </div>
     </div>
   );
 }
