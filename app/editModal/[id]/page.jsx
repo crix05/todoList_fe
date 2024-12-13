@@ -18,7 +18,7 @@ export default function Edit() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/todo/?id=${id}`); 
+        const response = await axios.get(`https://piemr2-piemrs-projects.vercel.app/todo/?id=${id}`); 
         console.log("Edit", response.data);
         setinitialData(response.data.task); 
       } catch (error) {

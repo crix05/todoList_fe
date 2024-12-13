@@ -34,7 +34,7 @@ export default function Home() {
     validationSchema: validation,
     onSubmit: async (values) => {
       try {
-        await axios.post(`http://localhost:3001/todo/`, values);
+        await axios.post(`https://piemr2-piemrs-projects.vercel.app/todo/`, values);
         formik.resetForm();
         fetchTasks();
       } catch (error) {
@@ -45,7 +45,7 @@ export default function Home() {
 
   const fetchTasks = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/todo/');
+      const response = await axios.get('https://piemr2-piemrs-projects.vercel.app/todo/');
       setTasks(response.data.tasks);
       console.log(response.data.tasks);
     } catch (error) {
@@ -66,7 +66,7 @@ export default function Home() {
     const updatedTasks = tasks.filter(task => task._id !== id);
     setTasks(updatedTasks);
 
-    axios.delete(`http://localhost:3001/todo/?id=${id}`)
+    axios.delete(`https://piemr2-piemrs-projects.vercel.app/todo/?id=${id}`)
       .then(response => {
         console.log('Task deleted:', response.data);
       })
