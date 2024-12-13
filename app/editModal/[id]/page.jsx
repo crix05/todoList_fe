@@ -1,5 +1,6 @@
 'use client';
 
+import './editModal.css';
 import * as yup from 'yup';
 import { Formik, useFormik } from "formik";
 import { TextField, Select, MenuItem, FormControl, InputLabel, FormHelperText } from "@mui/material";
@@ -8,7 +9,6 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
-import './editModal.css';
 
 export default function Edit() {
   const params = useParams();
@@ -54,7 +54,7 @@ export default function Edit() {
     onSubmit: async (values) => {
       console.log('Form submitted:', values);
         try {
-          await axios.put(`http://localhost:3001/todo/?id=${id}`, values);
+          await axios.put(`https://piemr2-piemrs-projects.vercel.app/todo/?id=${id}`, values);
           router.push('/'); 
         } catch (error) {
           console.error('Error updating task:', error);
