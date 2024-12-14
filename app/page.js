@@ -1,3 +1,5 @@
+// yup formik axios mui muiIcons npx create-next-app@latest
+
 'use client'
 import Task from './components/task/page';
 import * as yup from 'yup';
@@ -10,8 +12,12 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
+
+
   const router = useRouter();
   const [tasks, setTasks] = useState([]);
+
+
 
   const validation = yup.object({
     title: yup
@@ -33,6 +39,7 @@ export default function Home() {
     },
     validationSchema: validation,
     onSubmit: async (values) => {
+      // console.log('submitted')
       try {
         await axios.post(`https://piemr2-piemrs-projects.vercel.app/todo/`, values);
         formik.resetForm();
@@ -42,6 +49,8 @@ export default function Home() {
       }
     },
   });
+
+
 
   const fetchTasks = async () => {
     try {
@@ -56,6 +65,9 @@ export default function Home() {
   useEffect(() => {
     fetchTasks();
   }, []);
+
+
+
 
   const handleEdit = (id) => {
     router.push(`/editModal/${id}`);
@@ -75,6 +87,9 @@ export default function Home() {
       });
   };
 
+
+  
+
   return (
     <div className="container">
       <h1 className="header">Task Management</h1>
@@ -91,6 +106,8 @@ export default function Home() {
           value={formik.values.title}
           className="textField"
         />
+
+
 
         <FormControl
           variant="outlined"
@@ -117,6 +134,8 @@ export default function Home() {
         <Button type="submit" className="submitButton" variant="contained">Submit</Button>
       </form>
 
+
+
       <div className="task-container">
         {tasks.map((task, index) => (
           <Task
@@ -127,6 +146,14 @@ export default function Home() {
           />
         ))}
       </div>
+
+
+      {/* <Task
+        data={dataValues}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      /> */}
+
     </div>
   );
 }
